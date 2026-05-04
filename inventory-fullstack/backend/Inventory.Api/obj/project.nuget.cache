@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "ExJDBUeENBM=",
+  "success": true,
+  "projectFilePath": "C:\\Projetos\\inventory_fullstack\\inventory-fullstack\\backend\\Inventory.Api\\Inventory.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\otavi\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.7\\microsoft.aspnetcore.openapi.10.0.7.nupkg.sha512",
+    "C:\\Users\\otavi\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
