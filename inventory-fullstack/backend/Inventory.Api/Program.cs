@@ -1,3 +1,4 @@
+using Inventory.Api.DTOs;
 using Inventory.Api.Models;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,43 @@ app.MapGet("/products/{id:guid}", (Guid id) =>
     }
 
     return Results.Ok(product);
+});
+
+app.MapPost("/products", (CreateProductRequest request) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name))
+    {
+        return Results.BadRequest(new
+        {
+            message = "Product name is required"
+        });
+    }
+    if (request.Price <= 0)
+    {
+        return Results.BadRequest(new
+        {
+            message = "Product price must be greater than zero"
+        });
+    }
+    if (request.StockQuantity < 0)
+    {
+        return Results.BadRequest(new
+        {
+            message = "Stock quantity cannot be negative"
+        });
+    }
+    var product = new Product
+    {
+        Id = Guid.NewGuid(),
+        Name = request.Name,
+        Description = request.Description,
+        Price = request.Price,
+        StockQuantity = request.StockQuantity,
+        CreatedAt = DateTime.UtcNow
+    };
+
+    products.Add(product);
+    return Results.Created($"/products/{product.Id}", product);
 });
 
 app.Run();
