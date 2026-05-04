@@ -70,6 +70,21 @@ app.MapGet("/products", () =>
     return Results.Ok(products);
 });
 
+app.MapGet("/products/{id:guid}", (Guid id) =>
+{
+    var product = products.FirstOrDefault(product => product.Id == id);
+
+    if (product is null)
+    {
+        return Results.NotFound(new
+        {
+            message = "Product not found"
+        });
+    }
+
+    return Results.Ok(product);
+});
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

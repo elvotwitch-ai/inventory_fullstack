@@ -31,3 +31,4 @@ C:\Projetos\inventory_fullstack\inventory-fullstack\backend\Inventory.Api\obj\De
 C:\Projetos\inventory_fullstack\inventory-fullstack\backend\Inventory.Api\obj\Debug\net10.0\Inventory.Api.pdb
 C:\Projetos\inventory_fullstack\inventory-fullstack\backend\Inventory.Api\obj\Debug\net10.0\Inventory.Api.genruntimeconfig.cache
 C:\Projetos\inventory_fullstack\inventory-fullstack\backend\Inventory.Api\obj\Debug\net10.0\ref\Inventory.Api.dll
+C:\Projetos\inventory_fullstack\inventory-fullstack\backend\Inventory.Api\obj\Debug\net10.0\Inventory.Api.sourcelink.json
