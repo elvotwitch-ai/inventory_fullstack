@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+//app.UseHttpsRedirection();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -121,6 +122,63 @@ app.MapPost("/products", (CreateProductRequest request) =>
 
     products.Add(product);
     return Results.Created($"/products/{product.Id}", product);
+});
+
+app.MapPut("/products/{id:guid}", (Guid id, UpdateProductRequest request) =>
+{
+    var product = products.FirstOrDefault(product => product.Id == id);
+    if (product is null)
+    {
+        return Results.NotFound(new
+        {
+            message = "Product not found"
+        });
+    }
+
+    if (string.IsNullOrWhiteSpace(request.Name))
+    {
+        return Results.BadRequest(new
+        {
+            message = "Product name is required"
+        });
+    }
+
+    if (request.Price <= 0)
+    {
+        return Results.BadRequest(new
+        {
+            message = "Product price must be greater than zero"
+        });
+    }
+
+    if (request.StockQuantity < 0)
+    {
+        return Results.BadRequest(new
+        {
+            message = "Stock quantity cannot be negative"
+        });
+    }
+
+    product.Name = request.Name;
+    product.Description = request.Description;
+    product.Price = request.Price;
+    product.StockQuantity = request.StockQuantity;
+
+    return Results.Ok(product);
+});
+
+app.MapDelete("/products/{id:guid}", (Guid id) =>
+{
+    var product = products.FirstOrDefault(product => product.Id == id);
+    if (product is null)
+    {
+        return Results.NotFound(new
+        {
+            message = "Product not found"
+        });
+    }
+    products.Remove(product);
+    return Results.NoContent();
 });
 
 app.Run();
