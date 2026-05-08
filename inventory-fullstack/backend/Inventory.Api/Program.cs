@@ -1,6 +1,8 @@
 using Inventory.Api.DTOs;
 using Inventory.Api.Models;
+using Inventory.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<ProductService>();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -8,28 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
-
-var products = new List<Product>
-{
-    new Product
-    {
-        Id = Guid.NewGuid(),
-        Name = "camiseta preta",
-        Description = "camiseta basica tamanho G",
-        Price = 59.90m,
-        StockQuantity = 3,
-        CreatedAt = DateTime.UtcNow
-    },
-    new Product
-    {
-        Id = Guid.NewGuid(),
-        Name = "calça jeans",
-        Description = "calça jeans azul tamanho P",
-        Price = 89.90m,
-        StockQuantity = 3,
-        CreatedAt = DateTime.UtcNow
-    }
-};
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -67,27 +47,27 @@ app.MapGet("/healt", () =>
     });
 });
 
-app.MapGet("/products", () =>
+app.MapGet("/products", (string? search, ProductService productService) =>
 {
+    var products = productService.GetAll(search);
+
     return Results.Ok(products);
 });
 
-app.MapGet("/products/{id:guid}", (Guid id) =>
+app.MapGet("/products/{id:guid}", (Guid id, ProductService productService) =>
 {
-    var product = products.FirstOrDefault(product => product.Id == id);
-
+    var product = productService.GetById(id);
     if (product is null)
     {
         return Results.NotFound(new
         {
-            message = "Product not found"
+            message = "Product not Found"
         });
     }
-
     return Results.Ok(product);
 });
 
-app.MapPost("/products", (CreateProductRequest request) =>
+app.MapPost("/products", (CreateProductRequest request, ProductService productService) =>
 {
     if (string.IsNullOrWhiteSpace(request.Name))
     {
@@ -110,31 +90,12 @@ app.MapPost("/products", (CreateProductRequest request) =>
             message = "Stock quantity cannot be negative"
         });
     }
-    var product = new Product
-    {
-        Id = Guid.NewGuid(),
-        Name = request.Name,
-        Description = request.Description,
-        Price = request.Price,
-        StockQuantity = request.StockQuantity,
-        CreatedAt = DateTime.UtcNow
-    };
-
-    products.Add(product);
+    var product = productService.Create(request);
     return Results.Created($"/products/{product.Id}", product);
 });
 
-app.MapPut("/products/{id:guid}", (Guid id, UpdateProductRequest request) =>
+app.MapPut("/products/{id:guid}", (Guid id, UpdateProductRequest request, ProductService productService) =>
 {
-    var product = products.FirstOrDefault(product => product.Id == id);
-    if (product is null)
-    {
-        return Results.NotFound(new
-        {
-            message = "Product not found"
-        });
-    }
-
     if (string.IsNullOrWhiteSpace(request.Name))
     {
         return Results.BadRequest(new
@@ -158,18 +119,7 @@ app.MapPut("/products/{id:guid}", (Guid id, UpdateProductRequest request) =>
             message = "Stock quantity cannot be negative"
         });
     }
-
-    product.Name = request.Name;
-    product.Description = request.Description;
-    product.Price = request.Price;
-    product.StockQuantity = request.StockQuantity;
-
-    return Results.Ok(product);
-});
-
-app.MapDelete("/products/{id:guid}", (Guid id) =>
-{
-    var product = products.FirstOrDefault(product => product.Id == id);
+    var product = productService.Update(id, request);
     if (product is null)
     {
         return Results.NotFound(new
@@ -177,7 +127,20 @@ app.MapDelete("/products/{id:guid}", (Guid id) =>
             message = "Product not found"
         });
     }
-    products.Remove(product);
+
+    return Results.Ok(product);
+});
+
+app.MapDelete("/products/{id:guid}", (Guid id, ProductService productService) =>
+{
+    var deleted = productService.Delete(id);
+    if (!deleted)
+    {
+        return Results.NotFound(new
+        {
+            message = "Product not found"
+        });
+    }
     return Results.NoContent();
 });
 
