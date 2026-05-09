@@ -69,25 +69,12 @@ app.MapGet("/products/{id:guid}", (Guid id, ProductService productService) =>
 
 app.MapPost("/products", (CreateProductRequest request, ProductService productService) =>
 {
-    if (string.IsNullOrWhiteSpace(request.Name))
+    var validationError = ValidateCreateProductRequest(request);
+    if (validationError is not null)
     {
         return Results.BadRequest(new
         {
-            message = "Product name is required"
-        });
-    }
-    if (request.Price <= 0)
-    {
-        return Results.BadRequest(new
-        {
-            message = "Product price must be greater than zero"
-        });
-    }
-    if (request.StockQuantity < 0)
-    {
-        return Results.BadRequest(new
-        {
-            message = "Stock quantity cannot be negative"
+            message = validationError
         });
     }
     var product = productService.Create(request);
@@ -96,27 +83,12 @@ app.MapPost("/products", (CreateProductRequest request, ProductService productSe
 
 app.MapPut("/products/{id:guid}", (Guid id, UpdateProductRequest request, ProductService productService) =>
 {
-    if (string.IsNullOrWhiteSpace(request.Name))
+    var validationError = ValidateUpdateProductRequest(request);
+    if (validationError is not null)
     {
         return Results.BadRequest(new
         {
-            message = "Product name is required"
-        });
-    }
-
-    if (request.Price <= 0)
-    {
-        return Results.BadRequest(new
-        {
-            message = "Product price must be greater than zero"
-        });
-    }
-
-    if (request.StockQuantity < 0)
-    {
-        return Results.BadRequest(new
-        {
-            message = "Stock quantity cannot be negative"
+            message = validationError
         });
     }
     var product = productService.Update(id, request);
@@ -146,6 +118,41 @@ app.MapDelete("/products/{id:guid}", (Guid id, ProductService productService) =>
 
 app.Run();
 
+static string? ValidateCreateProductRequest(CreateProductRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request.Name))
+    {
+        return "Product name is required";
+    }
+    if (request.Price <= 0)
+    {
+        return "Product price must be grater than zero";
+    }
+    if (request.StockQuantity < 0)
+    {
+        return "Stock quantity cannot be negative";
+    }
+    return null;
+}
+static string? ValidateUpdateProductRequest(UpdateProductRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request.Name))
+    {
+        return "Product name is required";
+    }
+
+    if (request.Price <= 0)
+    {
+        return "Product price must be greater than zero";
+    }
+
+    if (request.StockQuantity < 0)
+    {
+        return "Stock quantity cannot be negative";
+    }
+
+    return null;
+}
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
